@@ -6,6 +6,7 @@ import Topbar from './Topbar';
 import SectionLabel from './SectionLabel';
 import PnlCard from './PnlCard';
 import StatsGrid from './StatsGrid';
+import GoalsComponent from './Goals';
 
 type Accent = { name: string; hex: string; strong: string; soft: string; line: string };
 
@@ -66,6 +67,7 @@ export default function Dashboard(props: Props) {
       </div>
       <SectionLabel num="02" title="Metrics & Goals" hint="core numbers · progress" />
       <StatsGrid summary={props.summary} records={props.records} />
+      <GoalsComponent summary={props.summary} goals={props.goals} />
       <SectionLabel num="03" title="Buy History"     hint="sortable · searchable · paginated" />
 
       <pre className="mono" style={{ padding: 20, fontSize: 12 }}>
