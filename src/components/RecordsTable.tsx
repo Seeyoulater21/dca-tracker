@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { fmtInt, fmtThb, fmtDateShort } from './_fmt';
 import type { EnrichedEntry } from '@/types';
 
@@ -27,11 +28,58 @@ const COLUMNS: Column[] = [
 type Props = { records: EnrichedEntry[] };
 
 export default function RecordsTable({ records }: Props) {
+  const router = useRouter();
   const [sortKey, setSortKey] = useState<Column['key']>('dayActive');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(30);
   const [query, setQuery] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editFiat, setEditFiat] = useState(0);
+  const [editPrice, setEditPrice] = useState(0);
+  const [busyId, setBusyId] = useState<number | null>(null);
+
+  function startEdit(r: EnrichedEntry) {
+    setEditingId(r.id);
+    setEditFiat(r.fiat_thb);
+    setEditPrice(r.price_thb);
+  }
+
+  async function saveEdit(id: number) {
+    setBusyId(id);
+    try {
+      const res = await fetch(`/api/entries/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fiat_thb: editFiat, price_thb: editPrice }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        window.alert(body.error || 'Save failed');
+        return;
+      }
+      setEditingId(null);
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function deleteRow(r: EnrichedEntry) {
+    if (!window.confirm(`Delete entry for ${fmtDateShort(r.date)}?`)) return;
+    setBusyId(r.id);
+    try {
+      const res = await fetch(`/api/entries/${r.id}`, { method: 'DELETE' });
+      const body = await res.json();
+      if (!res.ok || !body.ok) {
+        window.alert(body.error || 'Delete failed');
+        return;
+      }
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     if (!query.trim()) return records;
@@ -119,29 +167,69 @@ export default function RecordsTable({ records }: Props) {
                   </span>
                 </th>
               ))}
+              <th aria-label="Row actions" style={{ width: 60 }} />
             </tr>
           </thead>
           <tbody>
             {pageData.length === 0 ? (
               <tr>
-                <td colSpan={COLUMNS.length} className="left" style={{ color: 'var(--muted)', textAlign: 'center', padding: 20 }}>
+                <td colSpan={COLUMNS.length + 1} className="left" style={{ color: 'var(--muted)', textAlign: 'center', padding: 20 }}>
                   No records. Click Add buy to start.
                 </td>
               </tr>
             ) : (
-              pageData.map((r) => (
-                <tr key={r.id}>
-                  {COLUMNS.map((c) => {
-                    const raw = (r as unknown as Record<string, number | string>)[c.key as string];
-                    const cls = c.cls && typeof raw === 'number' ? c.cls(raw) : '';
-                    return (
-                      <td key={String(c.key)} className={(c.align === 'left' ? 'left ' : '') + cls}>
-                        {c.fmt(raw!, r)}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
+              pageData.map((r) => {
+                const isEditing = editingId === r.id;
+                const busy = busyId === r.id;
+                return (
+                  <tr key={r.id}>
+                    {COLUMNS.map((c) => {
+                      if (isEditing && c.key === 'fiat_thb') {
+                        return (
+                          <td key="fiat_thb" className="row-edit">
+                            <input type="number" value={editFiat} min={1} onChange={(e) => setEditFiat(+e.target.value)} />
+                          </td>
+                        );
+                      }
+                      if (isEditing && c.key === 'price_thb') {
+                        return (
+                          <td key="price_thb" className="row-edit">
+                            <input type="number" value={editPrice} min={1} onChange={(e) => setEditPrice(+e.target.value)} />
+                          </td>
+                        );
+                      }
+                      if (isEditing && c.key === 'satoshi') {
+                        const satPerTHB = editPrice > 0 ? 1e8 / editPrice : 0;
+                        return <td key="satoshi">{fmtInt(Math.floor(editFiat * satPerTHB))}</td>;
+                      }
+                      const raw = (r as unknown as Record<string, number | string>)[c.key as string];
+                      const cls = c.cls && typeof raw === 'number' ? c.cls(raw) : '';
+                      return (
+                        <td key={String(c.key)} className={(c.align === 'left' ? 'left ' : '') + cls}>
+                          {c.fmt(raw!, r)}
+                        </td>
+                      );
+                    })}
+                    <td className="row-actions">
+                      {isEditing ? (
+                        <>
+                          <button onClick={() => saveEdit(r.id)} disabled={busy} title="Save">✓</button>
+                          <button onClick={() => setEditingId(null)} disabled={busy} title="Cancel">✕</button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => startEdit(r)} title="Edit">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13l-3 1 1-3 8.5-8.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
+                          </button>
+                          <button className="danger" onClick={() => deleteRow(r)} title="Delete">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2.5h4V4M4.5 4v10h7V4" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
