@@ -8,6 +8,7 @@ import PnlCard from './PnlCard';
 import ChartCard from './ChartCard';
 import StatsGrid from './StatsGrid';
 import GoalsComponent from './Goals';
+import RecordsTable from './RecordsTable';
 
 type Accent = { name: string; hex: string; strong: string; soft: string; line: string };
 
@@ -70,22 +71,7 @@ export default function Dashboard(props: Props) {
       <StatsGrid summary={props.summary} records={props.records} />
       <GoalsComponent summary={props.summary} goals={props.goals} />
       <SectionLabel num="03" title="Buy History"     hint="sortable · searchable · paginated" />
-
-      <pre className="mono" style={{ padding: 20, fontSize: 12 }}>
-        {JSON.stringify(
-          {
-            records: props.records.length,
-            summary: props.summary ? 'present' : null,
-            delta24: props.delta24,
-            currentPrice: props.currentPrice,
-            priceStale: props.priceStale,
-            goals: props.goals,
-            accent: accent.name,
-          },
-          null,
-          2,
-        )}
-      </pre>
+      <RecordsTable records={props.records} />
     </div>
   );
 }
