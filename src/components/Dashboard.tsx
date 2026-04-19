@@ -9,6 +9,7 @@ import ChartCard from './ChartCard';
 import StatsGrid from './StatsGrid';
 import GoalsComponent from './Goals';
 import RecordsTable from './RecordsTable';
+import AddBuyModal from './AddBuyModal';
 
 type Accent = { name: string; hex: string; strong: string; soft: string; line: string };
 
@@ -32,6 +33,7 @@ type Props = {
 
 export default function Dashboard(props: Props) {
   const [accent, setAccent] = useState<Accent>(ACCENTS[0]!);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('dca.accent') : null;
@@ -53,7 +55,7 @@ export default function Dashboard(props: Props) {
   return (
     <div className="shell">
       <Topbar
-        onAdd={() => { /* wired in Task 16 */ }}
+        onAdd={() => setShowModal(true)}
         onToggleTweaks={() => { /* wired in Task 17 */ }}
       />
 
@@ -72,6 +74,12 @@ export default function Dashboard(props: Props) {
       <GoalsComponent summary={props.summary} goals={props.goals} />
       <SectionLabel num="03" title="Buy History"     hint="sortable · searchable · paginated" />
       <RecordsTable records={props.records} />
+      {showModal && (
+        <AddBuyModal
+          onClose={() => setShowModal(false)}
+          currentPrice={props.currentPrice}
+        />
+      )}
     </div>
   );
 }
