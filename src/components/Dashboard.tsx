@@ -10,17 +10,7 @@ import StatsGrid from './StatsGrid';
 import GoalsComponent from './Goals';
 import RecordsTable from './RecordsTable';
 import AddBuyModal from './AddBuyModal';
-
-type Accent = { name: string; hex: string; strong: string; soft: string; line: string };
-
-const ACCENTS: Accent[] = [
-  { name: 'Bitcoin Orange', hex: '#F2A900', strong: '#E89100', soft: '#FFF4DC', line: 'rgba(242,169,0,0.15)' },
-  { name: 'Saffron',        hex: '#E77B1D', strong: '#C86511', soft: '#FCE9D6', line: 'rgba(231,123,29,0.15)' },
-  { name: 'Amber',          hex: '#D98F1C', strong: '#B37416', soft: '#FBEBCF', line: 'rgba(217,143,28,0.15)' },
-  { name: 'Crimson',        hex: '#C84A3F', strong: '#A33A2F', soft: '#F5DCD8', line: 'rgba(200,74,63,0.15)' },
-  { name: 'Forest',         hex: '#2E7D5B', strong: '#24634A', soft: '#D9EBDF', line: 'rgba(46,125,91,0.15)' },
-  { name: 'Ink',            hex: '#2B3A66', strong: '#1F2B4D', soft: '#DBE0EE', line: 'rgba(43,58,102,0.15)' },
-];
+import TweaksPanel, { ACCENTS, type Accent } from './TweaksPanel';
 
 type Props = {
   records: EnrichedEntry[];
@@ -34,6 +24,7 @@ type Props = {
 export default function Dashboard(props: Props) {
   const [accent, setAccent] = useState<Accent>(ACCENTS[0]!);
   const [showModal, setShowModal] = useState(false);
+  const [showTweaks, setShowTweaks] = useState(false);
 
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('dca.accent') : null;
@@ -56,7 +47,7 @@ export default function Dashboard(props: Props) {
     <div className="shell">
       <Topbar
         onAdd={() => setShowModal(true)}
-        onToggleTweaks={() => { /* wired in Task 17 */ }}
+        onToggleTweaks={() => setShowTweaks(v => !v)}
       />
 
       <SectionLabel num="01" title="Overview"          hint="PNL · chart · hover for daily values" />
@@ -78,6 +69,13 @@ export default function Dashboard(props: Props) {
         <AddBuyModal
           onClose={() => setShowModal(false)}
           currentPrice={props.currentPrice}
+        />
+      )}
+      {showTweaks && (
+        <TweaksPanel
+          onClose={() => setShowTweaks(false)}
+          accent={accent}
+          setAccent={setAccent}
         />
       )}
     </div>
