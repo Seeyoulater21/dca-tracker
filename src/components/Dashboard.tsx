@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { EnrichedEntry, Summary, Goals, Delta24 } from '@/types';
 import Topbar from './Topbar';
 import SectionLabel from './SectionLabel';
+import PnlCard from './PnlCard';
 
 type Accent = { name: string; hex: string; strong: string; soft: string; line: string };
 
@@ -52,7 +53,16 @@ export default function Dashboard(props: Props) {
         onToggleTweaks={() => { /* wired in Task 17 */ }}
       />
 
-      <SectionLabel num="01" title="Overview"        hint="PNL · chart · hover for daily values" />
+      <SectionLabel num="01" title="Overview"          hint="PNL · chart · hover for daily values" />
+      <div className="hero">
+        <PnlCard
+          summary={props.summary}
+          records={props.records}
+          delta24={props.delta24}
+          priceStale={props.priceStale}
+        />
+        {/* ChartCard inserted in Task 14 */}
+      </div>
       <SectionLabel num="02" title="Metrics & Goals" hint="core numbers · progress" />
       <SectionLabel num="03" title="Buy History"     hint="sortable · searchable · paginated" />
 
