@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import type { EnrichedEntry, Summary, Goals, Delta24 } from '@/types';
+import Topbar from './Topbar';
+import SectionLabel from './SectionLabel';
 
 type Accent = { name: string; hex: string; strong: string; soft: string; line: string };
 
@@ -45,16 +47,14 @@ export default function Dashboard(props: Props) {
 
   return (
     <div className="shell">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark">₿</div>
-          <div>
-            <div className="brand-name">DCA Tracker</div>
-            <div className="brand-sub">sats/THB · v1.0.0</div>
-          </div>
-        </div>
-        <div className="topbar-actions" />
-      </header>
+      <Topbar
+        onAdd={() => { /* wired in Task 16 */ }}
+        onToggleTweaks={() => { /* wired in Task 17 */ }}
+      />
+
+      <SectionLabel num="01" title="Overview"        hint="PNL · chart · hover for daily values" />
+      <SectionLabel num="02" title="Metrics & Goals" hint="core numbers · progress" />
+      <SectionLabel num="03" title="Buy History"     hint="sortable · searchable · paginated" />
 
       <pre className="mono" style={{ padding: 20, fontSize: 12 }}>
         {JSON.stringify(
