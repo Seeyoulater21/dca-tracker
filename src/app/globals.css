@@ -690,3 +690,11 @@ table.records {
 body { font-family: var(--sans); background: var(--bg); color: var(--fg); }
 .mono, code, pre { font-family: var(--mono); }
 * { font-variant-numeric: tabular-nums; }
+
+.chart-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

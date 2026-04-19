@@ -5,6 +5,7 @@ import type { EnrichedEntry, Summary, Goals, Delta24 } from '@/types';
 import Topbar from './Topbar';
 import SectionLabel from './SectionLabel';
 import PnlCard from './PnlCard';
+import ChartCard from './ChartCard';
 import StatsGrid from './StatsGrid';
 import GoalsComponent from './Goals';
 
@@ -63,7 +64,7 @@ export default function Dashboard(props: Props) {
           delta24={props.delta24}
           priceStale={props.priceStale}
         />
-        {/* ChartCard inserted in Task 14 */}
+        <ChartCard records={props.records} />
       </div>
       <SectionLabel num="02" title="Metrics & Goals" hint="core numbers · progress" />
       <StatsGrid summary={props.summary} records={props.records} />
