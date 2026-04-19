@@ -729,3 +729,20 @@ body { font-family: var(--sans); background: var(--bg); color: var(--fg); }
   font-size: 12px;
   color: var(--fg);
 }
+
+/* Goals inline-edit (new — not in ref) */
+.goal-ticks .editable {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+}
+.goal-ticks .editable:hover { border-bottom-color: var(--muted); }
+.goal-ticks input.inline {
+  font-family: var(--mono);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 1px 4px;
+  width: 110px;
+  color: var(--fg);
+  font-size: inherit;
+}
